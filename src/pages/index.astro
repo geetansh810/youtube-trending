@@ -725,9 +725,8 @@ import Layout from "../layouts/Layout.astro";
     { id: "15", name: "Pets", icon: "🐾" },
   ];
 
-  const API_KEY =
-    import.meta.env.PUBLIC_YOUTUBE_API_KEY ||
-    "AIzaSyCs9j__f-2ZEDOh5ONIaMdFcERm9NwO0eo";
+  const API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY || "";
+
   let currentRegion = localStorage.getItem("yt_region") || "IN";
   let currentCategory = "0";
   let currentSort = "default";
