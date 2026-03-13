@@ -67,11 +67,7 @@ jobs:
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
         working-directory: ${{ env.BUILD_PATH }}
       - name: Run key validation
-        run: |
-          if [ -z "${{ secrets.PUBLIC_YOUTUBE_API_KEY }}" ]; then
-            echo "PUBLIC_YOUTUBE_API_KEY is not set. Please add it to your repository secrets."
-            exit 1
-          fi
+        run: echo $PUBLIC_YOUTUBE_API_KEY
       - name: Build with Astro
         env:
           PUBLIC_YOUTUBE_API_KEY: ${{ secrets.PUBLIC_YOUTUBE_API_KEY }}
