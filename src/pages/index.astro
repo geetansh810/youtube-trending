@@ -531,6 +531,55 @@ import Layout from "../layouts/Layout.astro";
       overflow: hidden;
     }
   }
+
+  .dev-footer {
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+    padding: 40px 20px;
+    background: var(--bg);
+  }
+
+  .footer-inner {
+    max-width: 1100px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .footer-about h3 {
+    font-size: 1rem;
+    margin-bottom: 6px;
+  }
+
+  .footer-about p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    max-width: 520px;
+    line-height: 1.6;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .footer-links a {
+    font-size: 0.85rem;
+    color: #3ea6ff;
+    text-decoration: none;
+  }
+
+  .footer-links a:hover {
+    text-decoration: underline;
+  }
+
+  .footer-note {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 10px;
+  }
 </style>
 
 <Layout title="YT Trending — What's Hot Right Now">
@@ -608,6 +657,34 @@ import Layout from "../layouts/Layout.astro";
     <!-- Videos List -->
     <div id="videos-container"></div>
   </div>
+  <footer class="dev-footer">
+    <div class="footer-inner">
+      <div class="footer-about">
+        <h3>Built by Geetansh Agrawal</h3>
+        <p>
+          Full-stack developer passionate about building scalable web products.
+          This project shows real-time YouTube trending videos with filters,
+          analytics and a fast UI.
+        </p>
+      </div>
+
+      <div class="footer-links">
+        <a href="https://github.com/geetansh810" target="_blank">GitHub</a>
+        <a href="https://linkedin.com/in/geetansh810" target="_blank"
+          >LinkedIn</a
+        >
+        <a href="mailto:geetanshagrawal810@email.com">Email</a>
+        <a href="https://geetansh810.github.io/portfolio/" target="_blank"
+          >Portfolio</a
+        >
+      </div>
+
+      <div class="footer-note">
+        <p>© 2026 Geetansh Agrawal</p>
+        <p>Built with Astro + YouTube API</p>
+      </div>
+    </div>
+  </footer>
 </Layout>
 
 <script>
