@@ -1,0 +1,924 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<style is:global>
+  #app {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 0 60px;
+  }
+
+  /* ── Filters Bar ── */
+  #filters-bar {
+    position: sticky;
+    top: var(--header-height);
+    z-index: 90;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    transition:
+      background var(--transition),
+      border-color var(--transition);
+  }
+  #filters-inner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  #filters-inner::-webkit-scrollbar {
+    display: none;
+  }
+
+  .custom-select-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .custom-select {
+    appearance: none;
+    background: var(--chip-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 7px 30px 7px 14px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background var(--transition);
+    white-space: nowrap;
+  }
+  .custom-select:hover {
+    background: var(--chip-hover);
+  }
+  .custom-select:focus {
+    outline: none;
+    border-color: var(--text-secondary);
+  }
+  .select-arrow {
+    position: absolute;
+    right: 11px;
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    pointer-events: none;
+  }
+
+  .chips-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+  }
+  .chips-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  .chip {
+    padding: 7px 14px;
+    border-radius: 20px;
+    background: var(--chip-bg);
+    color: var(--text);
+    font-size: 0.85rem;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .chip:hover {
+    background: var(--chip-hover);
+  }
+  .chip.active {
+    background: var(--chip-active);
+    color: var(--chip-active-text);
+  }
+
+  /* ── Stats Bar ── */
+  #stats-bar {
+    display: flex;
+    gap: 8px;
+    padding: 10px 20px;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    min-height: 38px;
+  }
+
+  /* ── Skeleton ── */
+  .skeleton-row {
+    display: flex;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+  .skeleton-thumb {
+    width: 360px;
+    min-width: 360px;
+    height: 202px;
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    animation: shimmer 1.5s infinite;
+  }
+  .skeleton-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 4px;
+  }
+  .skeleton-line {
+    height: 13px;
+    background: var(--surface);
+    border-radius: 4px;
+    animation: shimmer 1.5s infinite;
+  }
+  .skeleton-line.w90 {
+    width: 90%;
+  }
+  .skeleton-line.w60 {
+    width: 60%;
+  }
+  .skeleton-line.w50 {
+    width: 50%;
+  }
+  .skeleton-line.w80 {
+    width: 80%;
+  }
+  .skeleton-line.w65 {
+    width: 65%;
+  }
+  .skeleton-line.tall {
+    height: 20px;
+  }
+  .skeleton-line.desc {
+    opacity: 0.55;
+    margin-top: 4px;
+  }
+  @keyframes shimmer {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+
+  /* ── Error ── */
+  #error-msg {
+    padding: 80px 20px;
+  }
+  .error-box {
+    max-width: 380px;
+    margin: 0 auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .error-icon {
+    font-size: 3rem;
+  }
+  .error-box h3 {
+    font-size: 1.1rem;
+  }
+  #error-detail {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+  .retry-btn {
+    padding: 10px 28px;
+    background: var(--yt-red);
+    color: white;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: background var(--transition);
+    margin-top: 6px;
+  }
+  .retry-btn:hover {
+    background: var(--yt-red-hover);
+  }
+
+  /* ─────────────────────────────────────────
+     VIDEO ROW — full-width YouTube list card
+  ───────────────────────────────────────── */
+  .video-row {
+    display: flex;
+    gap: 16px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background var(--transition);
+    align-items: flex-start;
+  }
+  .video-row:hover {
+    background: var(--surface);
+  }
+  .video-row:last-child {
+    border-bottom: none;
+  }
+
+  /* Thumbnail */
+  .vr-thumb {
+    position: relative;
+    width: 360px;
+    min-width: 360px;
+    height: 202px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--surface2);
+    flex-shrink: 0;
+  }
+  .vr-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.25s ease;
+  }
+  .video-row:hover .vr-thumb img {
+    transform: scale(1.03);
+  }
+
+  .vr-duration {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    background: rgba(0, 0, 0, 0.88);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+  }
+  .vr-rank {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: var(--yt-red);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 10px;
+  }
+  .vr-play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0);
+    transition: background 0.2s;
+  }
+  .video-row:hover .vr-play-overlay {
+    background: rgba(0, 0, 0, 0.28);
+  }
+  .vr-play-btn {
+    width: 56px;
+    height: 56px;
+    background: rgba(0, 0, 0, 0.78);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.8);
+    transition:
+      opacity 0.2s,
+      transform 0.2s;
+  }
+  .vr-play-btn svg {
+    fill: white;
+    width: 26px;
+    height: 26px;
+  }
+  .video-row:hover .vr-play-btn {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Info panel */
+  .vr-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding-top: 2px;
+  }
+
+  .vr-title {
+    font-size: 1.05rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--text);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color var(--transition);
+  }
+  .video-row:hover .vr-title {
+    color: var(--yt-red);
+  }
+
+  .vr-channel-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+  }
+  .vr-channel {
+    font-weight: 500;
+  }
+  .vr-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  .vr-stats {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+  }
+  .vr-stat {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .vr-desc {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-top: 2px;
+  }
+
+  .vr-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+  }
+  .vr-tag {
+    font-size: 0.78rem;
+    color: #3ea6ff;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 720px) {
+    .video-row {
+      flex-direction: column;
+      padding: 12px;
+      gap: 10px;
+    }
+    .vr-thumb {
+      width: 100%;
+      min-width: 0;
+      height: auto;
+      aspect-ratio: 16/9;
+    }
+    .vr-title {
+      font-size: 0.95rem;
+    }
+    .skeleton-row {
+      flex-direction: column;
+      padding: 12px;
+    }
+    .skeleton-thumb {
+      width: 100%;
+      min-width: 0;
+      height: auto;
+      aspect-ratio: 16/9;
+    }
+    #filters-inner {
+      padding: 8px 12px;
+    }
+    #stats-bar {
+      padding: 8px 12px;
+    }
+  }
+  @media (max-width: 480px) {
+    .vr-desc {
+      -webkit-line-clamp: 2;
+    }
+    .vr-stats {
+      gap: 10px;
+    }
+  }
+
+  /* Row container */
+
+  .video-row {
+    display: flex;
+    gap: 16px;
+    /* margin-bottom: 30px; */
+    max-width: 1000px;
+  }
+
+  /* Thumbnail */
+
+  .thumbnail {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .thumbnail img {
+    width: 360px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+
+  .duration {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.85);
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  /* Info section */
+
+  .video-info {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .channel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #aaa;
+  }
+
+  .channel img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+  }
+
+  .meta {
+    font-size: 14px;
+    color: #aaa;
+    margin-top: 4px;
+  }
+
+  .description {
+    width: 100%;
+    font-size: 14px;
+    color: #aaa;
+    margin-top: 8px;
+    max-width: 550px;
+  }
+
+  /* Tablet */
+
+  @media (max-width: 900px) {
+    .thumbnail img {
+      width: 280px;
+      height: 160px;
+    }
+
+    .title {
+      font-size: 16px;
+    }
+  }
+
+  /* Mobile */
+
+  @media (max-width: 600px) {
+    .video-row {
+      flex-direction: column;
+    }
+
+    .thumbnail img {
+      width: 100%;
+      height: auto;
+    }
+
+    .description {
+      max-width: 100%;
+      overflow: hidden;
+    }
+  }
+</style>
+
+<Layout title="YT Trending — What's Hot Right Now">
+  <div id="app">
+    <!-- Filters Bar -->
+    <div id="filters-bar">
+      <div id="filters-inner">
+        <div class="filter-group">
+          <div class="custom-select-wrap">
+            <select id="region-select" class="custom-select"></select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+
+        <div id="category-chips" class="chips-scroll"></div>
+
+        <div class="filter-group">
+          <div class="custom-select-wrap">
+            <select id="sort-select" class="custom-select">
+              <option value="default">🔥 Trending</option>
+              <option value="views">👁️ Most Views</option>
+              <option value="likes">👍 Most Likes</option>
+              <option value="comments">💬 Comments</option>
+              <option value="recent">🕐 Newest</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="custom-select-wrap">
+            <select id="results-select" class="custom-select">
+              <option value="25">25 videos</option>
+              <option value="50" selected>50 videos</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div id="stats-bar"></div>
+
+    <!-- Loading skeletons -->
+    <div id="loading" style="display:none;">
+      {
+        Array(8)
+          .fill(null)
+          .map(() => (
+            <div class="skeleton-row">
+              <div class="skeleton-thumb" />
+              <div class="skeleton-info">
+                <div class="skeleton-line w90 tall" />
+                <div class="skeleton-line w60" />
+                <div class="skeleton-line w50" />
+                <div class="skeleton-line w80 desc" />
+                <div class="skeleton-line w65 desc" />
+              </div>
+            </div>
+          ))
+      }
+    </div>
+
+    <!-- Error -->
+    <div id="error-msg" style="display:none;">
+      <div class="error-box">
+        <div class="error-icon">⚠️</div>
+        <h3>Failed to load trending videos</h3>
+        <p id="error-detail"></p>
+        <button id="retry-btn" class="retry-btn">Try Again</button>
+      </div>
+    </div>
+
+    <!-- Videos List -->
+    <div id="videos-container"></div>
+  </div>
+</Layout>
+
+<script>
+  const REGIONS = [
+    { code: "IN", name: "India", flag: "🇮🇳" },
+    { code: "US", name: "United States", flag: "🇺🇸" },
+    { code: "GB", name: "United Kingdom", flag: "🇬🇧" },
+    { code: "CA", name: "Canada", flag: "🇨🇦" },
+    { code: "AU", name: "Australia", flag: "🇦🇺" },
+    { code: "DE", name: "Germany", flag: "🇩🇪" },
+    { code: "FR", name: "France", flag: "🇫🇷" },
+    { code: "JP", name: "Japan", flag: "🇯🇵" },
+    { code: "KR", name: "South Korea", flag: "🇰🇷" },
+    { code: "BR", name: "Brazil", flag: "🇧🇷" },
+    { code: "MX", name: "Mexico", flag: "🇲🇽" },
+    { code: "RU", name: "Russia", flag: "🇷🇺" },
+    { code: "IT", name: "Italy", flag: "🇮🇹" },
+    { code: "ES", name: "Spain", flag: "🇪🇸" },
+    { code: "NL", name: "Netherlands", flag: "🇳🇱" },
+    { code: "PK", name: "Pakistan", flag: "🇵🇰" },
+    { code: "NG", name: "Nigeria", flag: "🇳🇬" },
+    { code: "ZA", name: "South Africa", flag: "🇿🇦" },
+    { code: "EG", name: "Egypt", flag: "🇪🇬" },
+    { code: "ID", name: "Indonesia", flag: "🇮🇩" },
+  ];
+  const CATEGORIES = [
+    { id: "0", name: "All", icon: "🔥" },
+    { id: "10", name: "Music", icon: "🎵" },
+    { id: "20", name: "Gaming", icon: "🎮" },
+    { id: "23", name: "Comedy", icon: "😂" },
+    { id: "24", name: "Entertainment", icon: "🎬" },
+    { id: "25", name: "News", icon: "📰" },
+    { id: "26", name: "How-to", icon: "🛠️" },
+    { id: "28", name: "Science", icon: "🔬" },
+    { id: "17", name: "Sports", icon: "⚽" },
+    { id: "22", name: "People", icon: "👤" },
+    { id: "19", name: "Travel", icon: "✈️" },
+    { id: "15", name: "Pets", icon: "🐾" },
+  ];
+
+  const API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY || "";
+  let currentRegion = localStorage.getItem("yt_region") || "IN";
+  let currentCategory = "0";
+  let currentSort = "default";
+  let maxResults = 50;
+  let allVideos = [];
+
+  // ── Analytics helpers ──
+  function getA() {
+    try {
+      return JSON.parse(localStorage.getItem("yt_trending_analytics") || "{}");
+    } catch {
+      return {};
+    }
+  }
+  function saveA(d) {
+    try {
+      localStorage.setItem("yt_trending_analytics", JSON.stringify(d));
+    } catch {}
+  }
+  function recordVisit() {
+    const a = getA(),
+      today = new Date().toISOString().slice(0, 10);
+    const weekDates = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - 6 + i);
+      return d.toISOString().slice(0, 10);
+    });
+    a.totalVisits = (a.totalVisits || 0) + 1;
+    a.lastVisitTime = new Date().toISOString();
+    if (a.lastVisitDate !== today) {
+      a.todayVisits = 1;
+      a.lastVisitDate = today;
+    } else {
+      a.todayVisits = (a.todayVisits || 0) + 1;
+    }
+    const pw = a.weeklyData || Array(7).fill(0),
+      pd = a.weeklyDates || [];
+    a.weeklyDates = weekDates;
+    a.weeklyData = weekDates.map((d, i) => {
+      if (d === today) return (pd[i] === d ? pw[i] : 0) + 1;
+      const pi = pd.indexOf(d);
+      return pi >= 0 ? pw[pi] : 0;
+    });
+    saveA(a);
+  }
+  function recordRegion(r) {
+    const a = getA();
+    a.regionHistory = a.regionHistory || {};
+    a.regionHistory[r] = (a.regionHistory[r] || 0) + 1;
+    saveA(a);
+  }
+  function recordCategory(c) {
+    const a = getA();
+    a.categoryHistory = a.categoryHistory || {};
+    a.categoryHistory[c] = (a.categoryHistory[c] || 0) + 1;
+    saveA(a);
+  }
+
+  // ── Formatters ──
+  function fmtN(n) {
+    n = Number(n);
+    if (n >= 1e9) return (n / 1e9).toFixed(1) + "B";
+    if (n >= 1e6) return (n / 1e6).toFixed(1) + "M";
+    if (n >= 1e3) return (n / 1e3).toFixed(1) + "K";
+    return n.toLocaleString();
+  }
+  function fmtDur(iso) {
+    if (!iso) return "";
+    const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if (!m) return "";
+    const h = +m[1] || 0,
+      mm = +m[2] || 0,
+      s = +m[3] || 0;
+    return h
+      ? `${h}:${String(mm).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+      : `${mm}:${String(s).padStart(2, "0")}`;
+  }
+  function ago(d) {
+    const diff = Math.floor((Date.now() - new Date(d)) / 1000);
+    if (diff < 60) return `${diff}s ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    if (diff < 2592000) return `${Math.floor(diff / 86400)}d ago`;
+    if (diff < 31536000) return `${Math.floor(diff / 2592000)}mo ago`;
+    return `${Math.floor(diff / 31536000)}y ago`;
+  }
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  // ── DOM refs ──
+  const regionSelect = document.getElementById("region-select");
+  const sortSelect = document.getElementById("sort-select");
+  const resultsSelect = document.getElementById("results-select");
+  const categoryChips = document.getElementById("category-chips");
+  const videosContainer = document.getElementById("videos-container");
+  const loadingEl = document.getElementById("loading");
+  const errorEl = document.getElementById("error-msg");
+  const errorDetail = document.getElementById("error-detail");
+  const statsBar = document.getElementById("stats-bar");
+  const retryBtn = document.getElementById("retry-btn");
+
+  // ── Build controls ──
+  REGIONS.forEach((r) => {
+    const o = document.createElement("option");
+    o.value = r.code;
+    o.textContent = `${r.flag} ${r.name}`;
+    if (r.code === currentRegion) o.selected = true;
+    regionSelect.appendChild(o);
+  });
+
+  CATEGORIES.forEach((c) => {
+    const btn = document.createElement("button");
+    btn.className = "chip" + (c.id === "0" ? " active" : "");
+    btn.innerHTML = `${c.icon} ${c.name}`;
+    btn.addEventListener("click", () => {
+      document
+        .querySelectorAll(".chip")
+        .forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentCategory = c.id;
+      recordCategory(c.name);
+      fetchVideos();
+    });
+    categoryChips.appendChild(btn);
+  });
+
+  regionSelect.addEventListener("change", () => {
+    currentRegion = regionSelect.value;
+    localStorage.setItem("yt_region", currentRegion);
+    recordRegion(currentRegion);
+    fetchVideos();
+  });
+  sortSelect.addEventListener("change", () => {
+    currentSort = sortSelect.value;
+    renderVideos();
+  });
+  resultsSelect.addEventListener("change", () => {
+    maxResults = parseInt(resultsSelect.value);
+    fetchVideos();
+  });
+  retryBtn.addEventListener("click", fetchVideos);
+
+  // ── Fetch ──
+  async function fetchVideos() {
+    const t0 = Date.now();
+    loadingEl.style.display = "block";
+    errorEl.style.display = "none";
+    videosContainer.innerHTML = "";
+    statsBar.innerHTML = "";
+
+    try {
+      let url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&chart=mostPopular&regionCode=${currentRegion}&maxResults=${maxResults}&key=${API_KEY}`;
+      if (currentCategory !== "0") url += `&videoCategoryId=${currentCategory}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message || "API error");
+      allVideos = data.items || [];
+      renderVideos();
+      const elapsed = ((Date.now() - t0) / 1000).toFixed(2);
+      const region = REGIONS.find((r) => r.code === currentRegion);
+      statsBar.innerHTML = `<span>${allVideos.length} videos</span><span>·</span><span>${region ? region.flag + " " + region.name : currentRegion}</span><span>·</span><span>Loaded in ${elapsed}s</span>`;
+      recordRegion(currentRegion);
+    } catch (e) {
+      errorDetail.textContent = e.message;
+      errorEl.style.display = "block";
+    } finally {
+      loadingEl.style.display = "none";
+    }
+  }
+
+  function sortVideos(vs) {
+    const v = [...vs];
+    switch (currentSort) {
+      case "views":
+        return v.sort(
+          (a, b) =>
+            Number(b.statistics?.viewCount || 0) -
+            Number(a.statistics?.viewCount || 0),
+        );
+      case "likes":
+        return v.sort(
+          (a, b) =>
+            Number(b.statistics?.likeCount || 0) -
+            Number(a.statistics?.likeCount || 0),
+        );
+      case "comments":
+        return v.sort(
+          (a, b) =>
+            Number(b.statistics?.commentCount || 0) -
+            Number(a.statistics?.commentCount || 0),
+        );
+      case "recent":
+        return v.sort(
+          (a, b) =>
+            new Date(b.snippet?.publishedAt) - new Date(a.snippet?.publishedAt),
+        );
+      default:
+        return v;
+    }
+  }
+
+  function renderVideos() {
+    const sorted = sortVideos(allVideos);
+    videosContainer.innerHTML = "";
+
+    sorted.forEach((video, idx) => {
+      const s = video.snippet;
+      const stats = video.statistics;
+      const thumb =
+        s.thumbnails?.maxresdefault?.url ||
+        s.thumbnails?.high?.url ||
+        s.thumbnails?.medium?.url ||
+        "";
+      const views = fmtN(stats?.viewCount || 0);
+      const likes = fmtN(stats?.likeCount || 0);
+      const comments = fmtN(stats?.commentCount || 0);
+      const duration = fmtDur(video.contentDetails?.duration || "");
+      const when = ago(s.publishedAt);
+      const desc = (s.description || "").slice(0, 220).trim();
+      const tags = (s.tags || []).slice(0, 5);
+
+      const row = document.createElement("div");
+      row.className = "video-row";
+      row.innerHTML = `
+            <div class="thumbnail">
+                <img src="${esc(thumb)}">
+                ${duration ? `<div class="duration">${duration}</div>` : ""}
+                <span class="vr-rank">#${idx + 1}</span>
+            </div>
+
+            <div class="video-info">
+                <div class="title">
+                  ${esc(s.title)}
+                </div>
+
+                <div class="channel">
+                    ${esc(s.channelTitle)} ✔
+                </div>
+
+                <div class="meta">
+                    ${views} views • ${when}
+                </div>
+
+                <div class="description">
+                  ${desc ? `<span class="" style="width:100%">${esc(desc)}</span>` : ""}
+                  ${tags.length ? `<span class="vr-tags">${tags.map((t) => `<span class="vr-tag">#${esc(t)}</span>`).join("")}</span>` : ""}
+                </div>
+            </div>
+      `;
+
+      row.addEventListener("click", () => {
+        window.openVideo(
+          video.id,
+          s.title,
+          Number(stats?.viewCount || 0).toLocaleString(),
+          duration,
+          when,
+        );
+      });
+
+      videosContainer.appendChild(row);
+    });
+  }
+
+  // ── Boot ──
+  recordVisit();
+  fetchVideos();
+</script>

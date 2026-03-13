@@ -1,0 +1,95 @@
+/* YouTube Trending - Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=YouTube+Sans:wght@400;500;700&display=swap');
+
+:root {
+  --yt-red: #ff0000;
+  --yt-red-hover: #cc0000;
+  --yt-dark-bg: #0f0f0f;
+  --yt-dark-surface: #1f1f1f;
+  --yt-dark-surface2: #272727;
+  --yt-dark-border: #3f3f3f;
+  --yt-dark-text: #f1f1f1;
+  --yt-dark-text-secondary: #aaaaaa;
+  --yt-dark-chip: #272727;
+  --yt-dark-chip-hover: #3f3f3f;
+  --yt-dark-chip-active: #f1f1f1;
+  --yt-dark-chip-active-text: #0f0f0f;
+
+  --yt-light-bg: #ffffff;
+  --yt-light-surface: #f2f2f2;
+  --yt-light-surface2: #e5e5e5;
+  --yt-light-border: #cccccc;
+  --yt-light-text: #0f0f0f;
+  --yt-light-text-secondary: #606060;
+  --yt-light-chip: #f2f2f2;
+  --yt-light-chip-hover: #e5e5e5;
+  --yt-light-chip-active: #0f0f0f;
+  --yt-light-chip-active-text: #ffffff;
+
+  /* Active theme variables */
+  --bg: var(--yt-dark-bg);
+  --surface: var(--yt-dark-surface);
+  --surface2: var(--yt-dark-surface2);
+  --border: var(--yt-dark-border);
+  --text: var(--yt-dark-text);
+  --text-secondary: var(--yt-dark-text-secondary);
+  --chip-bg: var(--yt-dark-chip);
+  --chip-hover: var(--yt-dark-chip-hover);
+  --chip-active: var(--yt-dark-chip-active);
+  --chip-active-text: var(--yt-dark-chip-active-text);
+
+  --font-main: 'Roboto', sans-serif;
+  --header-height: 56px;
+  --sidebar-width: 72px;
+  --transition: 0.2s ease;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+[data-theme="light"] {
+  --bg: var(--yt-light-bg);
+  --surface: var(--yt-light-surface);
+  --surface2: var(--yt-light-surface2);
+  --border: var(--yt-light-border);
+  --text: var(--yt-light-text);
+  --text-secondary: var(--yt-light-text-secondary);
+  --chip-bg: var(--yt-light-chip);
+  --chip-hover: var(--yt-light-chip-hover);
+  --chip-active: var(--yt-light-chip-active);
+  --chip-active-text: var(--yt-light-chip-active-text);
+  --shadow: 0 4px 24px rgba(0,0,0,0.1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-main);
+  background: var(--bg);
+  color: var(--text);
+  transition: background var(--transition), color var(--transition);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+img { display: block; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+/* Utility */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); border: 0;
+}

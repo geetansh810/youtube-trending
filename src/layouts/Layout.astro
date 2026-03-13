@@ -1,0 +1,550 @@
+---
+const { title = "YT Trending" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="YouTube Trending Videos - Explore what's trending globally"
+    />
+    <title>{title}</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles/global.css" />
+    <style>
+      #app-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--header-height);
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        gap: 16px;
+        z-index: 100;
+        transition:
+          background var(--transition),
+          border-color var(--transition);
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text);
+        white-space: nowrap;
+        text-decoration: none;
+      }
+      .logo-icon {
+        width: 32px;
+        height: 22px;
+        background: var(--yt-red);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .logo-icon svg {
+        width: 16px;
+        height: 16px;
+        fill: white;
+      }
+      .logo-text {
+        color: var(--text);
+        font-size: 1.1rem;
+      }
+      .logo-text span {
+        color: var(--yt-red);
+      }
+      .header-spacer {
+        flex: 1;
+      }
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .icon-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text);
+        transition: background var(--transition);
+        font-size: 1.1rem;
+      }
+      .icon-btn:hover {
+        background: var(--surface);
+      }
+      #analytics-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        background: var(--surface);
+        color: var(--text);
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: background var(--transition);
+        white-space: nowrap;
+      }
+      #analytics-btn:hover {
+        background: var(--surface2);
+      }
+      #theme-btn {
+        font-size: 1.2rem;
+      }
+      .main-content {
+        padding-top: var(--header-height);
+        min-height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <header id="app-header">
+      <a href="/" class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 16.5l6-4.5-6-4.5v9z"></path>
+          </svg>
+        </div>
+        <span class="logo-text">YT<span>Trending</span></span>
+      </a>
+      <div class="header-spacer"></div>
+      <div class="header-actions">
+        <button
+          id="analytics-btn"
+          class="icon-btn"
+          title="View Analytics"
+          style="width:auto;"
+        >
+          📊 Analytics
+        </button>
+        <button id="theme-btn" class="icon-btn" title="Toggle theme">🌙</button>
+      </div>
+    </header>
+    <main class="main-content">
+      <slot />
+    </main>
+
+    <!-- Analytics Modal -->
+    <div id="analytics-modal" class="modal-overlay" style="display:none;">
+      <div class="modal-box analytics-box">
+        <div class="modal-header">
+          <h2>📊 Visit Analytics</h2>
+          <button class="modal-close" id="analytics-close">✕</button>
+        </div>
+        <div id="analytics-content"></div>
+      </div>
+    </div>
+
+    <!-- Video Modal -->
+    <div id="video-modal" class="modal-overlay" style="display:none;">
+      <div class="modal-box video-box">
+        <div class="modal-header">
+          <h2
+            id="video-modal-title"
+            style="font-size:0.95rem;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+          >
+          </h2>
+          <a
+            id="video-modal-yt-link"
+            href="#"
+            target="_blank"
+            class="yt-link-btn"
+            title="Open on YouTube"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"
+              ><path d="M10 16.5l6-4.5-6-4.5v9z"></path><path
+                d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816z"
+              ></path></svg
+            >
+          </a>
+          <button class="modal-close" id="video-close">✕</button>
+        </div>
+        <div class="video-iframe-wrap">
+          <iframe
+            id="video-iframe"
+            src=""
+            allowfullscreen
+            allow="autoplay; encrypted-media"
+            frameborder="0"></iframe>
+        </div>
+        <div id="video-meta" class="video-meta-bar"></div>
+      </div>
+    </div>
+
+    <style is:global>
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        animation: fadeIn 0.15s ease;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .modal-box {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        width: 100%;
+        max-height: 90vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        animation: slideUp 0.2s ease;
+      }
+      @keyframes slideUp {
+        from {
+          transform: translateY(24px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      .video-box {
+        max-width: 900px;
+      }
+      .analytics-box {
+        max-width: 640px;
+        overflow-y: auto;
+      }
+      .modal-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      .modal-header h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+      .modal-close {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        font-size: 1rem;
+        flex-shrink: 0;
+        transition:
+          background var(--transition),
+          color var(--transition);
+      }
+      .modal-close:hover {
+        background: var(--surface2);
+        color: var(--text);
+      }
+      .video-iframe-wrap {
+        position: relative;
+        width: 100%;
+        padding-top: 56.25%;
+        background: #000;
+        flex-shrink: 0;
+      }
+      .video-iframe-wrap iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .video-meta-bar {
+        padding: 10px 16px;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        border-top: 1px solid var(--border);
+      }
+      .yt-link-btn {
+        color: var(--yt-red);
+        display: flex;
+        align-items: center;
+        padding: 4px;
+        border-radius: 4px;
+        transition: opacity var(--transition);
+      }
+      .yt-link-btn:hover {
+        opacity: 0.7;
+      }
+      /* Analytics styles */
+      #analytics-content {
+        padding: 20px;
+      }
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .stat-card {
+        background: var(--surface2);
+        border-radius: var(--radius-md);
+        padding: 16px;
+        text-align: center;
+      }
+      .stat-num {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--yt-red);
+        line-height: 1;
+      }
+      .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+      }
+      .analytics-section {
+        margin-bottom: 20px;
+      }
+      .analytics-section h3 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .mini-chart {
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        height: 60px;
+      }
+      .bar-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+      .bar {
+        width: 100%;
+        background: var(--yt-red);
+        border-radius: 3px 3px 0 0;
+        min-height: 2px;
+        transition: height 0.3s ease;
+      }
+      .bar-label {
+        font-size: 0.65rem;
+        color: var(--text-secondary);
+      }
+      .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .tag {
+        padding: 4px 10px;
+        background: var(--surface2);
+        border-radius: 12px;
+        font-size: 0.8rem;
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .tag-count {
+        color: var(--yt-red);
+        font-weight: 600;
+      }
+      @media (max-width: 480px) {
+        .stat-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+
+    <script>
+      // Theme
+      const savedTheme = localStorage.getItem("yt_theme") || "dark";
+      document.documentElement.setAttribute("data-theme", savedTheme);
+      const themeBtn = document.getElementById("theme-btn");
+      themeBtn.textContent = savedTheme === "dark" ? "☀️" : "🌙";
+      themeBtn.addEventListener("click", () => {
+        const cur = document.documentElement.getAttribute("data-theme");
+        const next = cur === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
+        localStorage.setItem("yt_theme", next);
+        themeBtn.textContent = next === "dark" ? "☀️" : "🌙";
+      });
+
+      // Analytics modal
+      const analyticsBtn = document.getElementById("analytics-btn");
+      const analyticsModal = document.getElementById("analytics-modal");
+      const analyticsClose = document.getElementById("analytics-close");
+
+      function getAnalytics() {
+        try {
+          const raw = localStorage.getItem("yt_trending_analytics");
+          return raw ? JSON.parse(raw) : {};
+        } catch {
+          return {};
+        }
+      }
+
+      analyticsBtn.addEventListener("click", () => {
+        const a = getAnalytics();
+        const content = document.getElementById("analytics-content");
+
+        const today = a.todayVisits || 0;
+        const total = a.totalVisits || 0;
+        const watched = a.videosWatched || 0;
+
+        // Weekly chart
+        const weekly = a.weeklyData || Array(7).fill(0);
+        const dates = a.weeklyDates || [];
+        const maxW = Math.max(...weekly, 1);
+        const bars = weekly
+          .map((v, i) => {
+            const pct = Math.round((v / maxW) * 100);
+            const day = dates[i]
+              ? new Date(dates[i]).toLocaleDateString("en", {
+                  weekday: "short",
+                })
+              : "";
+            return `<div class="bar-col"><div class="bar" style="height:${pct}%"></div><span class="bar-label">${day}</span></div>`;
+          })
+          .join("");
+
+        // Region tags
+        const regionHist = a.regionHistory || {};
+        const regionTags = Object.entries(regionHist)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 8)
+          .map(
+            ([r, c]) =>
+              `<span class="tag">${r} <span class="tag-count">${c}</span></span>`,
+          )
+          .join("");
+
+        // Category tags
+        const catHist = a.categoryHistory || {};
+        const catTags = Object.entries(catHist)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 8)
+          .map(
+            ([c, n]) =>
+              `<span class="tag">${c} <span class="tag-count">${n}</span></span>`,
+          )
+          .join("");
+
+        const lastVisit = a.lastVisitTime
+          ? new Date(a.lastVisitTime).toLocaleString()
+          : "Never";
+
+        content.innerHTML = `
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total Visits</div></div>
+          <div class="stat-card"><div class="stat-num">${today}</div><div class="stat-label">Today</div></div>
+          <div class="stat-card"><div class="stat-num">${watched}</div><div class="stat-label">Videos Watched</div></div>
+        </div>
+        <div class="analytics-section">
+          <h3>7-Day Activity</h3>
+          <div class="mini-chart" style="align-items:flex-end;">${bars}</div>
+        </div>
+        ${regionTags ? `<div class="analytics-section"><h3>Regions Explored</h3><div class="tag-list">${regionTags}</div></div>` : ""}
+        ${catTags ? `<div class="analytics-section"><h3>Categories Browsed</h3><div class="tag-list">${catTags}</div></div>` : ""}
+        <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:8px;">Last visit: ${lastVisit}</div>
+      `;
+
+        analyticsModal.style.display = "flex";
+      });
+
+      analyticsClose.addEventListener(
+        "click",
+        () => (analyticsModal.style.display = "none"),
+      );
+      analyticsModal.addEventListener("click", (e) => {
+        if (e.target === analyticsModal) analyticsModal.style.display = "none";
+      });
+
+      // Video modal
+      const videoModal = document.getElementById("video-modal");
+      const videoClose = document.getElementById("video-close");
+      const videoIframe = document.getElementById("video-iframe");
+      const videoTitle = document.getElementById("video-modal-title");
+      const videoYtLink = document.getElementById("video-modal-yt-link");
+      const videoMeta = document.getElementById("video-meta");
+
+      window.openVideo = function (
+        videoId,
+        title,
+        views,
+        duration,
+        publishedAt,
+      ) {
+        videoIframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`;
+        videoTitle.textContent = title;
+        videoYtLink.href = `https://www.youtube.com/watch?v=${videoId}`;
+        videoMeta.innerHTML = `
+        <span>👁️ ${views} views</span>
+        ${duration ? `<span>⏱️ ${duration}</span>` : ""}
+        ${publishedAt ? `<span>📅 ${publishedAt}</span>` : ""}
+      `;
+        videoModal.style.display = "flex";
+        // Track watch
+        try {
+          const raw = localStorage.getItem("yt_trending_analytics");
+          const a = raw ? JSON.parse(raw) : {};
+          a.videosWatched = (a.videosWatched || 0) + 1;
+          localStorage.setItem("yt_trending_analytics", JSON.stringify(a));
+        } catch {}
+      };
+
+      videoClose.addEventListener("click", () => {
+        videoModal.style.display = "none";
+        videoIframe.src = "";
+      });
+      videoModal.addEventListener("click", (e) => {
+        if (e.target === videoModal) {
+          videoModal.style.display = "none";
+          videoIframe.src = "";
+        }
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          videoModal.style.display = "none";
+          videoIframe.src = "";
+          analyticsModal.style.display = "none";
+        }
+      });
+    </script>
+  </body>
+</html>
