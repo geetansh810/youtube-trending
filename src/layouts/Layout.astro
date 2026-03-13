@@ -1,4 +1,5 @@
 ---
+import "../styles/global.css";
 const { title = "YT Trending" } = Astro.props;
 ---
 
@@ -22,7 +23,15 @@ const { title = "YT Trending" } = Astro.props;
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/styles/global.css" />
+    <!-- <link rel="stylesheet" href="/styles/global.css" /> -->
+    <!-- <link
+      rel="stylesheet"
+      href={new URL("/styles/global.css", Astro.site).href.replace(
+        Astro.site?.href ?? "",
+        "/" + import.meta.env.BASE_URL.replace(/^\//, "") + "/",
+      )}
+    /> -->
+
     <style>
       #app-header {
         position: fixed;
