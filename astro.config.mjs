@@ -1,6 +1,6 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  output: 'static',
-  site: 'https://youtube-trending.app',
+  site: "https://geetansh810.github.io",
+  base: "/youtube-trending",
 });
